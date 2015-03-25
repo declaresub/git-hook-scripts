@@ -8,7 +8,6 @@ KEYS=("hook-envvars.$HOOK_NAME")
 
 for KEY in ${KEYS[@]} ;
 do
-    echo "$KEY"
     HOOK_VARS=$(git config --list | grep "$KEY" | sed "s/$KEY.//g")
     for line in $HOOK_VARS;
     do
