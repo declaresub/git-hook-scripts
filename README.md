@@ -48,7 +48,7 @@ Create a symlink from run-hook-scripts to each hook you want to call.
 
 Set the hook scripts to be called in your repository configuration.
 
-    git config --add git config --add hook-envvars.pre-commit.hook-scripts tox 
+    git config --add hook-envvars.pre-commit.hook-scripts tox 
     
 Set any other environment variables needed for the scripts (e.g. create-tag-for-version).  
 On execution, run-hook-scripts reads the repository configuration and sets the environment 
