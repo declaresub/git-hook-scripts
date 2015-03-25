@@ -10,7 +10,7 @@ them in other repostories with a minimum of duplication.
 Checks syntax of [Puppet](https://puppetlabs.com/) .pp files and .erb template files.
 
 
-## <a name="ctfv">create-tag-for-version</a>
+## create-tag-for-version
 
 A post-commit script that creates a git tag corresponding to a Python package version.  
 You need to set an environment variable `$PYTHON_PACKAGE_NAME ` to the name of the Python 
@@ -50,7 +50,7 @@ Set the hook scripts to be called in your repository configuration.
 
     git config --add git config --add hook-envvars.pre-commit.hook-scripts tox 
     
-Set any other environment variables needed for the scripts (e.g. [create-tag-for-version](#ctfv)).  
+Set any other environment variables needed for the scripts (e.g. create-tag-for-version).  
 On execution, run-hook-scripts reads the repository configuration and sets the environment 
 variables, executes git stash, then executes the scripts in the order specified.  
 If a script exits with code > 0, run-hook-scripts bails out.  On exit, run-hook-scripts 
