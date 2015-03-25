@@ -1,0 +1,19 @@
+#! /bin/bash
+
+
+if [[ -z $PYTHON_PACKAGE_NAME ]]; then
+    echo "You should set the $PYTHON_PACKAGE_NAME variable in your repository:" >&2
+    echo "git config --add hook-envvars.post-commit.python-package-name PYTHON_PACKAGE_NAME". >&2
+    exit 1
+fi
+
+PACKAGE_VERSION=$(python -c "import $PYTHON_PACKAGE_NAME; print($PYTHON_PACKAGE_NAME.__version__)")
+if [[ -z $PACKAGE_VERSION ]]; then
+    echo "Unable to read $PYTHON_PACKAGE_NAME.__version__." >&2
+    exit 1
+fi
+
+git tag | grep --quiet --line-regexp "${PACKAGE_VERSION}"
+if [[ $? -eq 1 ]]; then
+    git tag -a "$PACKAGE_VERSION" -m "Tag $PACKAGE_VERSION created by post-commit hook."
+fi

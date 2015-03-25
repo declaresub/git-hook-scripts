@@ -1,0 +1,13 @@
+#! /bin/bash
+
+# Runs pylint, checking only for errors.
+# Probably the repository should contain a pylintrc file so that multiple developers are
+# all using the same one.
+
+if [[ -z $PYLINT_PACKAGES ]]; then
+    echo "You should set the $PYLINT_PACKAGES variable in your repository:" >&2
+    echo 'git config --add hook-envvars.post-commit.pylint-packages "PYLINT_PACKAGES"'. >&2
+    exit 1
+fi
+
+/usr/local/bin/pylint --errors-only $PYLINT_PACKAGES
