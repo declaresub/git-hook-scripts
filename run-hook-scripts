@@ -1,28 +1,28 @@
 #! /bin/bash
 
 
-HOOK_NAME=$(basename $0)
-HOOK_SCRIPTS_DIR=$(dirname $(readlink $0))
+HOOK_NAME=$(basename "$0")
+HOOK_SCRIPTS_DIR=$(dirname "$(readlink "$0")")
 KEYS=("hook-envvars.$HOOK_NAME")
 
-for KEY in ${KEYS[@]} ;
+for KEY in "${KEYS[@]}" ;
 do
     HOOK_VARS=$(git config --list | grep "$KEY" | sed "s/$KEY.//g")
     for line in $HOOK_VARS;
     do
         HOOK_VAR=( ${line//=/ } )
-        eval export $(echo ${HOOK_VAR[0]^^*} | tr - _ | tr '[:lower:]' '[:upper:]')=${HOOK_VAR[1]}
+        eval export "$(echo "${HOOK_VAR[0]}" | tr - _ | tr '[:lower:]' '[:upper:]')"="${HOOK_VAR[1]}"
     done
 done
 
 HOOK_SCRIPT_ARR=($HOOK_SCRIPTS)
 
-if [[ ${#HOOK_SCRIPT_ARR[@]} -ge 0 ]];then
+if [[ ${#HOOK_SCRIPT_ARR[@]} -ge 0 ]]; then
     git stash --include-untracked --keep-index --quiet
     trap "{ git stash pop --quiet; }" EXIT
     for cmd in "${HOOK_SCRIPT_ARR[@]}";
     do
-        source $HOOK_SCRIPTS_DIR/$cmd
+        source "$HOOK_SCRIPTS_DIR/$cmd"
         if [[ $? -ne 0 ]]; then
             exit 1
         fi

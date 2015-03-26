@@ -10,4 +10,4 @@ if [[ -z $PYLINT_PACKAGES ]]; then
     exit 1
 fi
 
-/usr/local/bin/pylint --errors-only $PYLINT_PACKAGES
+/usr/local/bin/pylint --errors-only "$PYLINT_PACKAGES"
