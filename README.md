@@ -51,6 +51,15 @@ Set the hook scripts to be called in your repository configuration.
     git config --add hook-envvars.pre-commit.hook-scripts tox 
     
 Set any other environment variables needed for the scripts (e.g. create-tag-for-version).  
+Here is the relevant piece of .git/config from one of my repositories.
+
+    [hook-envvars "post-commit"]
+        python-package-name = wsgiapp
+        hook-scripts = create-tag-for-version
+    [hook-envvars "pre-commit"]
+        hook-scripts = tox
+        path = /Applications/Tower.app/Contents/Resources/git/libexec/git-core:/Applications/Tower.app/Contents/Resources/git/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Python.framework/Versions/3.4/bin:/usr/local/bin
+	
 On execution, run-hook-scripts reads the repository configuration and sets the environment 
 variables, executes git stash, then executes the scripts in the order specified.  
 If a script exits with code > 0, run-hook-scripts bails out.  On exit, run-hook-scripts 
@@ -60,6 +69,39 @@ runs git stash pop.
 ## tox
 
 A pre-commit script that runs [tox](http://codespeak.net/tox/).
+
+
+# Potential Issues
+
+## $PATH
+
+You may run into issues with the $PATH variable, especially if you use a GUI.  I work on a 
+Mac and use Tower.  When it runs git, it sets 
+
+    $PATH = /Applications/Tower.app/Contents/Resources/git/libexec/git-core:/Applications/Tower.app/Contents/Resources/git/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+As a result, neither tox nor Python 3 could be found.  
+
+The solution is to set the $PATH variable yourself in your git configuration.  Here's mine.
+
+    git config --add hook-envvars.pre-commit.path \
+    /Applications/Tower.app/Contents/Resources/git/libexec/git-core:\
+    /Applications/Tower.app/Contents/Resources/git/bin:/usr/bin:/bin:/usr/sbin:/sbin:\
+    /Library/Frameworks/Python.framework/Versions/3.4/bin:/usr/local/bin
+
+
+If you run into this issue and need to see the value of $PATH, add this line to 
+run-hook-scripts near the top.
+
+    echo "PATH = $PATH"
+    
+It should appear in whatever output you get.  Alternatively, redirect to a file.
+
+    echo "PATH = $PATH" > /tmp/PATH
+
+
+
+
 
 
 
