@@ -1,7 +1,6 @@
 #! /bin/bash
 
 
-
 HOOK_NAME=$(basename $0)
 HOOK_SCRIPTS_DIR=$(dirname $(readlink $0))
 KEYS=("hook-envvars.$HOOK_NAME")
