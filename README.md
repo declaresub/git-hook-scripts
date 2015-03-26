@@ -3,14 +3,14 @@
 Git-Hook-Scripts is my repository for various git hook scripts, and a mechanism for using 
 them in other repostories with a minimum of duplication.
 
-# The Hook Scripts
+## The Hook Scripts
 
-## check-puppet-syntax
+### check-puppet-syntax
 
 Checks syntax of [Puppet](https://puppetlabs.com/) .pp files and .erb template files.
 
 
-## create-tag-for-version
+### create-tag-for-version
 
 A post-commit script that creates a git tag corresponding to a Python package version.  
 You need to set an environment variable `$PYTHON_PACKAGE_NAME ` to the name of the Python 
@@ -21,7 +21,7 @@ package containing the version.
 The script loads the package and looks for `pycrust.__version__` . If there is no tag 
 corresponding to the version string, the script creates one.  
 
-## pylint
+### pylint
 
 Runs pylint, checking only for errors.  The repository should probably contain a pylintrc 
 file so that all developers are using the same settings.  If you don't have it: 
@@ -37,7 +37,7 @@ environment variable.  To set it in your git config:
 quotes.
 
 
-## run-hook-scripts
+### run-hook-scripts
 
 The main interface to hook scripts.  Configure your repository to use hook scripts as follows.
 
@@ -66,14 +66,14 @@ If a script exits with code > 0, run-hook-scripts bails out.  On exit, run-hook-
 runs git stash pop.
 
 
-## tox
+### tox
 
 A pre-commit script that runs [tox](http://codespeak.net/tox/).
 
 
-# Potential Issues
+## Potential Issues
 
-## $PATH
+### $PATH
 
 You may run into issues with the $PATH variable, especially if you use a GUI.  I work on a 
 Mac and use Tower.  When it runs git, it sets 
