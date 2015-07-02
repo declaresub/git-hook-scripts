@@ -1,9 +1,13 @@
 #! /bin/bash
 
-
 HOOK_NAME=$(basename "$0")
 HOOK_SCRIPTS_DIR=$(dirname "$(readlink "$0")")
 KEYS=("hook-envvars.$HOOK_NAME")
+
+function popStash() {
+    git stash pop --quiet
+}
+
 
 for KEY in "${KEYS[@]}" ;
 do
@@ -16,14 +20,21 @@ do
 done
 
 HOOK_SCRIPT_ARR=($HOOK_SCRIPTS)
-
 if [[ ${#HOOK_SCRIPT_ARR[@]} -ge 0 ]]; then
     git stash --include-untracked --keep-index --quiet
-    trap "{ git stash pop --quiet; }" EXIT
+    STASHED=$?
+    if [[ $STASHED -ne 0 ]]; then
+        logger "git stash returned exit code ${STASHED}."
+        exit 1
+    fi
+    trap popStash EXIT
     for cmd in "${HOOK_SCRIPT_ARR[@]}";
     do
         source "$HOOK_SCRIPTS_DIR/$cmd"
-        if [[ $? -ne 0 ]]; then
+        LAST_EXIT_CODE=$?
+        # Reset the trap in case the sourced script overwrote it.
+        trap popStash EXIT
+        if [[ $LAST_EXIT_CODE -ne 0 ]]; then
             exit 1
         fi
     done
