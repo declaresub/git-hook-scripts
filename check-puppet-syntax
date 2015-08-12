@@ -3,15 +3,6 @@
 # stolen from http://projects.puppetlabs.com/projects/1/wiki/Puppet_Version_Control
 
 
-on_exit()
-    {
-    rm -f "$error_msg"
-    }
-
-trap 'on_exit' EXIT
-
-syntax_errors=0
-error_msg=$(mktemp /tmp/error_msg.XXXXXX)
 if git rev-parse --quiet --verify HEAD > /dev/null
 then
     against=HEAD
@@ -21,34 +12,30 @@ else
 fi
 
 # Get list of new/modified manifest and template files to check (in git index)
-for indexfile in $(git diff-index --diff-filter=AM --name-only --cached "$against" | egrep '\.(pp|erb)')
+for indexfile in $(git diff-index --diff-filter=AM --name-only --cached "$against" | egrep '\.(pp|erb|yaml)')
 do
     # Don't check empty files
     if [ "$(git cat-file -s :0:"$indexfile")" -gt 0 ]
     then
-        echo "Checking $indexfile." >> /tmp/pre-commit
         case $indexfile in
             *.pp )
                 # check puppet syntax
                 # A Puppet bug https://tickets.puppetlabs.com/browse/PUP-1778 prevents the 
                 #use of the --ignoreimport flag.  This means that syntax-checking may not  
                 # work so well with the Puppet import statement.
-                git cat-file blob :0:"$indexfile" | puppet parser validate --color=false  > "$error_msg" ;;
+                ERROR_MSG=$(git cat-file blob :0:"$indexfile" | puppet parser validate --color=false 2>&1 > /dev/null) ;;
             *.erb )
                 # Check ERB template syntax
-                git cat-file blob :0:"$indexfile" | erb -x -T - | ruby -c 2> "$error_msg" > /dev/null ;;
+                ERROR_MSG=$(git cat-file blob :0:"$indexfile" | erb -x -T - | ruby -c 2>&1 > /dev/null) ;;
+            *.yaml )
+                # Check yaml syntax.  Usually invoked for hiera files.
+                ERROR_MSG=$(ruby -e "require 'yaml'; YAML.load_file('${indexfile}')" 2>&1 > /dev/null) ;;
+
         esac
         if [ "$?" -ne 0 ]
         then
-            echo -n "$indexfile: "
-            cat "$error_msg"
-            syntax_errors=$((syntax_errors + 1))
+            echo -n "$indexfile: $ERROR_MSG"
+            exit 1
         fi
     fi
 done
-
-if [ "$syntax_errors" -ne 0 ]
-then
-    echo "Error: $syntax_errors syntax errors found. Aborting commit."
-    exit 1
-fi

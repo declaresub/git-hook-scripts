@@ -8,7 +8,6 @@ function popStash() {
     git stash pop --quiet
 }
 
-
 for KEY in "${KEYS[@]}" ;
 do
     HOOK_VARS=$(git config --list | grep "$KEY" | sed "s/$KEY.//g")
