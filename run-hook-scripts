@@ -1,36 +1,27 @@
 #! /bin/bash
 
-HOOK_NAME=$(basename "$0")
-HOOK_SCRIPTS_DIR=$(dirname "$(readlink "$0")")
-KEYS=("hook-envvars.$HOOK_NAME")
+set -e
+set -u
+set -o pipefail
+
 
 function popStash() {
     git stash pop --quiet
 }
 
-for KEY in "${KEYS[@]}" ;
-do
-    HOOK_VARS=$(git config --list | grep "$KEY" | sed "s/$KEY.//g")
-    for line in $HOOK_VARS;
-    do
-        HOOK_VAR=( ${line//=/ } )
-        eval export "$(echo "${HOOK_VAR[0]}" | tr - _ | tr '[:lower:]' '[:upper:]')"="${HOOK_VAR[1]}"
-    done
-done
+HOOK_NAME=$(basename "$0")
+HOOK_SCRIPTS=($(git config --get-all "hook-envvars.$HOOK_NAME.hook-scripts"))
+HOOK_SCRIPTS_DIR=$(dirname "$(readlink "$0")")
 
-HOOK_SCRIPT_ARR=($HOOK_SCRIPTS)
-if [[ ${#HOOK_SCRIPT_ARR[@]} -ge 0 ]]; then
+if [[ ${#HOOK_SCRIPTS[@]} -ge 0 ]]; then
     git stash --include-untracked --keep-index --quiet
-    STASHED=$?
-    if [[ $STASHED -ne 0 ]]; then
-        logger "git stash returned exit code ${STASHED}."
-        exit 1
-    fi
     trap popStash EXIT
-    for cmd in "${HOOK_SCRIPT_ARR[@]}";
+    for cmd in "${HOOK_SCRIPTS[@]}";
     do
+        set +e
         source "$HOOK_SCRIPTS_DIR/$cmd"
         LAST_EXIT_CODE=$?
+        set -e
         # Reset the trap in case the sourced script overwrote it.
         trap popStash EXIT
         if [[ $LAST_EXIT_CODE -ne 0 ]]; then
