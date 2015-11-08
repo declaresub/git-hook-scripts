@@ -34,7 +34,7 @@ do
         esac
         if [ "$?" -ne 0 ]
         then
-            echo -n "$indexfile: $ERROR_MSG"
+            echo "$indexfile: $ERROR_MSG"
             exit 1
         fi
     fi
